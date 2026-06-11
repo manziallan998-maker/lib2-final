@@ -22,6 +22,7 @@
   --emerald: #166534; --emerald-light: #f0fdf4;
   --crimson: #be123c; --crimson-light: #fff1f2;
   --violet: #5b21b6; --violet-light: #f5f3ff;
+  --orange: #c2410c; --orange-light: #fff7ed;
   --border: #e2ddd8; --border-2: #d0cbc4;
   --shadow-xs: 0 1px 2px rgba(28,25,23,.05);
   --shadow-sm: 0 1px 6px rgba(28,25,23,.08);
@@ -116,17 +117,22 @@ table { border-collapse: collapse; width: 100%; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ─── STATS ─── */
-.stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 15px; margin-bottom: 22px; }
+.stats-row { display: grid; grid-template-columns: repeat(5,1fr); gap: 15px; margin-bottom: 22px; }
 .stat-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 18px 20px; position: relative; overflow: hidden; transition: box-shadow var(--t), transform var(--t); }
 .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
 .stat-card::after { content: ''; position: absolute; top: 0; right: 0; width: 72px; height: 72px; border-radius: 0 0 0 72px; opacity: .07; }
 .s-rust::after { background: var(--rust); } .s-teal::after { background: var(--teal); }
 .s-amber::after { background: var(--amber); } .s-emerald::after { background: var(--emerald); }
+.s-violet::after { background: var(--violet); }
 .stat-icon { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 12px; }
 .s-rust .stat-icon { background: var(--rust-light); } .s-teal .stat-icon { background: var(--teal-light); }
 .s-amber .stat-icon { background: var(--amber-light); } .s-emerald .stat-icon { background: var(--emerald-light); }
+.s-violet .stat-icon { background: var(--violet-light); }
 .stat-val { font-family: 'Playfair Display', serif; font-size: 1.9rem; line-height: 1; margin-bottom: 3px; }
 .stat-lbl { font-size: .78rem; color: var(--ink-muted); font-weight: 500; }
+/* clickable stat card */
+.stat-card.clickable { cursor: pointer; }
+.stat-card.clickable:hover { border-color: var(--rust); }
 
 /* ─── CARDS ─── */
 .card { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; }
@@ -142,6 +148,10 @@ table { border-collapse: collapse; width: 100%; }
 .a-text { font-size: .8rem; color: var(--ink-muted); line-height: 1.5; }
 .a-text strong { color: var(--ink); }
 .a-time { font-size: .68rem; color: var(--ink-faint); margin-top: 2px; display: block; }
+
+/* ─── CONDITION CALLOUT BOX (issue modal) ─── */
+.condition-box { background: var(--amber-light); border: 1.5px solid rgba(180,83,9,.18); border-radius: var(--r-sm); padding: 11px 14px; margin-top: 4px; font-size: .79rem; color: var(--amber); line-height: 1.6; display: none; }
+.condition-box.visible { display: block; }
 
 /* ─── SECTION HEADER ─── */
 .sec-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
@@ -187,6 +197,8 @@ table { border-collapse: collapse; width: 100%; }
 .badge-teal { background: var(--teal-light); color: var(--teal); }
 .badge-gray { background: var(--surface-3); color: var(--ink-muted); }
 .badge-rust { background: var(--rust-light); color: var(--rust); }
+.badge-violet { background: var(--violet-light); color: var(--violet); }
+.badge-orange { background: #fff7ed; color: #c2410c; }
 .t-actions { display: flex; gap: 4px; align-items: center; }
 .btn-te { background: var(--teal-light); color: var(--teal); padding: 3px 8px; border-radius: 4px; font-size: .73rem; font-weight: 600; transition: all var(--t); }
 .btn-te:hover { background: var(--teal); color: #fff; }
@@ -281,6 +293,7 @@ table { border-collapse: collapse; width: 100%; }
 .sidebar-backdrop.open { display: block; }
 
 /* ─── RESPONSIVE ─── */
+@media (max-width: 1200px) { .stats-row { grid-template-columns: repeat(3,1fr); } }
 @media (max-width: 1100px) { .stats-row { grid-template-columns: repeat(2,1fr); } .dash-grid { grid-template-columns: 1fr; } }
 @media (max-width: 860px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .main { margin-left: 0; } .hamburger { display: flex; } .settings-grid { grid-template-columns: 1fr; } }
 @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .page-content { padding: 14px 12px; } .topbar { padding: 0 12px; } .stats-row { grid-template-columns: 1fr 1fr; } }
@@ -343,7 +356,7 @@ table { border-collapse: collapse; width: 100%; }
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <div class="logo-mark">📚</div>
-      <div class="logo-name">G.S APAPEC MURAMBI<span>Library managemant System</span></div>
+      <div class="logo-name">G.S APAPEC MURAMBI<span>Library Management System</span></div>
     </div>
     <div class="sidebar-user">
       <div class="user-avatar">A</div>
@@ -394,13 +407,19 @@ table { border-collapse: collapse; width: 100%; }
     <div class="stat-card s-teal"><div class="stat-icon">🎓</div><div class="stat-val" id="statStudents">0</div><div class="stat-lbl">Students</div></div>
     <div class="stat-card s-amber"><div class="stat-icon">🔄</div><div class="stat-val" id="statIssued">0</div><div class="stat-lbl">Active Issues</div></div>
     <div class="stat-card s-emerald"><div class="stat-icon">⚠️</div><div class="stat-val" id="statOverdue">0</div><div class="stat-lbl">Overdue</div></div>
+    <!-- NEW: damaged books stat card — clicking it navigates to the damaged report -->
+    <div class="stat-card s-violet clickable" onclick="Nav.go('reports'); setTimeout(()=>Reports.renderReport('damaged'),80)" title="View damaged books report">
+      <div class="stat-icon">🔧</div>
+      <div class="stat-val" id="statDamaged">0</div>
+      <div class="stat-lbl">Books w/ Problems</div>
+    </div>
   </div>
   <div class="dash-grid">
     <div class="card">
       <div class="card-head"><span class="card-title">📋 Recent Issues</span></div>
       <div style="padding:0"><div class="tbl-scroll">
         <table class="tbl">
-          <thead><tr><th>Student</th><th>Book</th><th>Grade</th><th>Due</th><th>Status</th></tr></thead>
+          <thead><tr><th>Student</th><th>Book</th><th>Grade</th><th>Condition</th><th>Due</th><th>Status</th></tr></thead>
           <tbody id="recentIssuesTbody"></tbody>
         </table>
       </div></div>
@@ -488,6 +507,7 @@ table { border-collapse: collapse; width: 100%; }
         <option value="all">All</option>
         <option value="overdue">Overdue</option>
         <option value="returned">Returned</option>
+        <option value="damaged">With Problems</option>
       </select>
       <button class="btn btn-primary" onclick="Issues.openModal()">＋ Issue Book</button>
     </div>
@@ -497,7 +517,7 @@ table { border-collapse: collapse; width: 100%; }
       <table class="tbl">
         <thead><tr>
           <th>Issue ID</th><th>Student</th><th>Class</th><th>Book Code</th><th>Subject</th><th>Grade</th>
-          <th>Issued</th><th>Return Date</th><th>Status</th><th>Actions</th>
+          <th>Issued</th><th>Return Date</th><th>Condition</th><th>Status</th><th>Actions</th>
         </tr></thead>
         <tbody id="issuesTbody"></tbody>
       </table>
@@ -518,6 +538,7 @@ table { border-collapse: collapse; width: 100%; }
   <div class="report-tabs">
     <button class="rpt-tab active" data-report="issued">Active Issues</button>
     <button class="rpt-tab" data-report="overdue">Overdue</button>
+    <button class="rpt-tab" data-report="damaged">🔧 Damaged Books</button>
     <button class="rpt-tab" data-report="inventory">Inventory</button>
     <button class="rpt-tab" data-report="history">Full History</button>
   </div>
@@ -565,6 +586,7 @@ table { border-collapse: collapse; width: 100%; }
         <div class="info-row"><label>Active Issues</label><span class="val" id="sysActiveIssues">—</span></div>
         <div class="info-row"><label>Total Issue Records</label><span class="val" id="sysTotalIssues">—</span></div>
         <div class="info-row"><label>Overdue</label><span class="val" id="sysOverdue">—</span></div>
+        <div class="info-row"><label>Books w/ Problems</label><span class="val" id="sysDamaged">—</span></div>
         <div class="info-row"><label>Supabase</label><span class="val" id="sysConn">—</span></div>
       </div>
     </div>
@@ -587,12 +609,9 @@ table { border-collapse: collapse; width: 100%; }
       </div>
     </div>
 
-    <!-- ═══ DATA MANAGEMENT CARD (new) ═══ -->
     <div class="settings-card" style="grid-column:1/-1">
       <div class="sc-head">🗄️ Data Management</div>
       <div class="sc-body" style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
-
-        <!-- Backup -->
         <div style="flex:1;min-width:200px">
           <div style="font-size:.82rem;color:var(--ink-muted);margin-bottom:12px;line-height:1.7">
             <strong style="color:var(--ink);display:block;margin-bottom:3px">⬇️ Backup</strong>
@@ -600,8 +619,6 @@ table { border-collapse: collapse; width: 100%; }
           </div>
           <button class="btn btn-teal" onclick="Settings.downloadBackup()">⬇️ Download Backup</button>
         </div>
-
-        <!-- Restore -->
         <div style="flex:1;min-width:200px;border-left:1px solid var(--border);padding-left:20px">
           <div style="font-size:.82rem;color:var(--ink-muted);margin-bottom:12px;line-height:1.7">
             <strong style="color:var(--ink);display:block;margin-bottom:3px">⬆️ Restore</strong>
@@ -612,8 +629,6 @@ table { border-collapse: collapse; width: 100%; }
             <input type="file" id="restoreFileInput" accept=".json" style="display:none" onchange="Settings.restoreBackup(this)">
           </label>
         </div>
-
-        <!-- Reset -->
         <div style="flex:1;min-width:200px;border-left:1px solid var(--border);padding-left:20px">
           <div style="font-size:.82rem;color:var(--ink-muted);margin-bottom:12px;line-height:1.7">
             <strong style="color:var(--crimson);display:block;margin-bottom:3px">🔴 Reset System</strong>
@@ -621,10 +636,8 @@ table { border-collapse: collapse; width: 100%; }
           </div>
           <button class="btn btn-danger" onclick="Settings.openResetModal()">🔴 Reset System</button>
         </div>
-
       </div>
     </div>
-    <!-- ═══ END DATA MANAGEMENT CARD ═══ -->
 
   </div>
 </section>
@@ -712,7 +725,7 @@ table { border-collapse: collapse; width: 100%; }
   </div>
 </div>
 
-<!-- Issue Modal -->
+<!-- Issue Modal — updated with condition fields -->
 <div class="modal-overlay" id="issueModal">
   <div class="modal">
     <div class="modal-head">
@@ -748,6 +761,30 @@ table { border-collapse: collapse; width: 100%; }
           <label>Expected Return Date</label>
           <input class="fi" type="date" id="issueDue">
         </div>
+
+        <!-- ── NEW: Book Condition at Time of Issue ── -->
+        <div class="fg full" style="border-top:1px solid var(--border);padding-top:12px;margin-top:2px">
+          <label>Book Condition at Issue <span>*</span>
+            <small style="font-weight:400;color:var(--ink-faint)"> — record how the book looks RIGHT NOW before handing it out</small>
+          </label>
+          <select class="fs" id="issueCondition" onchange="Issues.onConditionChange()">
+            <option value="good">✅ Good — no visible problems</option>
+            <option value="minor_damage">🟡 Minor Damage — small tears or marks</option>
+            <option value="poor_cover">🟠 Poor Cover — cover is torn or missing</option>
+            <option value="missing_pages">🔴 Missing Pages — some pages are missing</option>
+            <option value="other">⚠️ Other — describe in notes below</option>
+          </select>
+        </div>
+        <div class="fg full" id="conditionNotesFg">
+          <label>Condition Notes <small style="font-weight:400;color:var(--ink-faint)">(optional for Good; recommended for any problem)</small></label>
+          <input class="fi" type="text" id="issueConditionNotes" placeholder="e.g. Back cover is torn, page 12 has a stain…" autocomplete="off">
+          <!-- warning hint that shows when condition is not good -->
+          <div class="condition-box" id="conditionWarningBox">
+            ⚠️ You are recording that this book has a problem. This note will be saved with the issue record so that when the student returns it, you can check against what was already recorded — protecting both you and the student.
+          </div>
+        </div>
+        <!-- ── END condition fields ── -->
+
       </div>
     </div>
     <div class="modal-foot">
@@ -757,7 +794,7 @@ table { border-collapse: collapse; width: 100%; }
   </div>
 </div>
 
-<!-- ═══ RESET SYSTEM MODAL (new) ═══ -->
+<!-- Reset System Modal -->
 <div class="modal-overlay" id="resetModal">
   <div class="modal" style="max-width:420px">
     <div class="modal-head">
@@ -786,7 +823,6 @@ table { border-collapse: collapse; width: 100%; }
     </div>
   </div>
 </div>
-<!-- ═══ END RESET MODAL ═══ -->
 
 <script>
 /* ═══════════════════════════════════════════════════
@@ -808,8 +844,28 @@ function initSupabase() {
 }
 
 /* ═══════════════════════════════════════════════════
-   DATABASE LAYER — Supabase only
-   Tables: books, students, book_issues
+   CONDITION HELPERS
+   Maps the DB value to a human label and badge class
+═══════════════════════════════════════════════════ */
+const CONDITION_MAP = {
+  good:          { label: '✅ Good',          cls: 'badge-green'  },
+  minor_damage:  { label: '🟡 Minor Damage',  cls: 'badge-amber'  },
+  poor_cover:    { label: '🟠 Poor Cover',    cls: 'badge-orange' },
+  missing_pages: { label: '🔴 Missing Pages', cls: 'badge-red'    },
+  other:         { label: '⚠️ Other',         cls: 'badge-violet' },
+};
+
+function condBadge(val) {
+  const c = CONDITION_MAP[val] || CONDITION_MAP['good'];
+  return `<span class="badge ${c.cls}">${c.label}</span>`;
+}
+
+function condLabel(val) {
+  return (CONDITION_MAP[val] || CONDITION_MAP['good']).label;
+}
+
+/* ═══════════════════════════════════════════════════
+   DATABASE LAYER
 ═══════════════════════════════════════════════════ */
 const DB = {
   async testConn() {
@@ -900,6 +956,7 @@ const DB = {
     if (filters.status === 'active')   q = q.eq('returned', false);
     else if (filters.status === 'returned') q = q.eq('returned', true);
     else if (filters.status === 'overdue')  q = q.eq('returned', false).lt('return_date', today);
+    else if (filters.status === 'damaged')  q = q.neq('book_condition', 'good');
 
     if (filters.student_id) q = q.eq('student_id', filters.student_id);
     q = q.order('issue_date', { ascending: false });
@@ -1025,7 +1082,7 @@ document.getElementById('confirmCancelBtn').onclick = () => Confirm.cancel();
 document.getElementById('confirmOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) Confirm.cancel(); });
 
 /* ═══════════════════════════════════════════════════
-   AUTH — Simple local password
+   AUTH
 ═══════════════════════════════════════════════════ */
 const Auth = {
   login() {
@@ -1099,22 +1156,26 @@ const Dashboard = {
         DB.getBooks(), DB.getStudents(), DB.getIssues()
       ]);
       const today = U.today();
-      const active = issues.filter(i => !i.returned);
+      const active  = issues.filter(i => !i.returned);
       const overdue = active.filter(i => i.return_date && i.return_date < today);
+      // count any issue record (active or returned) where condition is not good
+      const damaged = issues.filter(i => i.book_condition && i.book_condition !== 'good');
 
-      document.getElementById('statBooks').textContent = books.length;
+      document.getElementById('statBooks').textContent    = books.length;
       document.getElementById('statStudents').textContent = students.length;
-      document.getElementById('statIssued').textContent = active.length;
-      document.getElementById('statOverdue').textContent = overdue.length;
+      document.getElementById('statIssued').textContent   = active.length;
+      document.getElementById('statOverdue').textContent  = overdue.length;
+      document.getElementById('statDamaged').textContent  = damaged.length;
 
       const badge = document.getElementById('overdueNavBadge');
       if (overdue.length) { badge.style.display = ''; badge.textContent = overdue.length; }
       else badge.style.display = 'none';
 
+      // recent issues table — now includes a Condition column
       const recent = issues.slice(0, 6);
       const tbody = document.getElementById('recentIssuesTbody');
       if (!recent.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:22px;color:var(--ink-muted)">No issues yet</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:22px;color:var(--ink-muted)">No issues yet</td></tr>`;
       } else {
         tbody.innerHTML = recent.map(i => {
           const overdueDays = i.return_date && !i.returned ? U.daysDiff(i.return_date) : 0;
@@ -1127,6 +1188,7 @@ const Dashboard = {
             <td>${U.esc(i.student?.student_name || '?')}</td>
             <td>${U.esc(i.book?.subject || i.book?.book_category || '?')}</td>
             <td><span class="badge badge-teal">${U.esc(i.book?.grade || '?')}</span></td>
+            <td>${condBadge(i.book_condition || 'good')}</td>
             <td>${U.fmt(i.return_date)}</td>
             <td>${st}</td>
           </tr>`;
@@ -1414,6 +1476,17 @@ const Students = {
 const Issues = {
   page: 1, _cache: [],
 
+  /* Called when the condition dropdown changes in the Issue modal */
+  onConditionChange() {
+    const val = document.getElementById('issueCondition').value;
+    const box = document.getElementById('conditionWarningBox');
+    if (val !== 'good') {
+      box.classList.add('visible');
+    } else {
+      box.classList.remove('visible');
+    }
+  },
+
   async render() {
     const filter = document.getElementById('issueFilter')?.value || 'active';
     const q = document.getElementById('issueSearch')?.value?.toLowerCase() || '';
@@ -1429,7 +1502,9 @@ const Issues = {
           i.book?.book_category || '',
           i.book?.grade || '',
           i.book_code || '',
-          String(i.issue_id)
+          String(i.issue_id),
+          i.book_condition || '',
+          i.condition_notes || ''
         ].some(f => f.toLowerCase().includes(q)));
       }
 
@@ -1439,7 +1514,7 @@ const Issues = {
       const tbody = document.getElementById('issuesTbody');
 
       if (!data.length) {
-        tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">🔄</div><h3>No issues found</h3></div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">🔄</div><h3>No issues found</h3></div></td></tr>`;
       } else {
         tbody.innerHTML = data.map(i => {
           const returned = i.returned;
@@ -1454,6 +1529,8 @@ const Issues = {
             stBadge = `<span class="badge badge-green">Active</span>`;
             actionBtn = `<button class="btn-rt btn-xs" onclick="Issues.returnBook(${i.issue_id})">↩ Return</button>`;
           }
+          const cond = i.book_condition || 'good';
+          const notesTooltip = i.condition_notes ? ` title="${U.esc(i.condition_notes)}"` : '';
           return `<tr>
             <td><strong>${i.issue_id}</strong></td>
             <td>${U.esc(i.student?.student_name || '?')}</td>
@@ -1463,6 +1540,7 @@ const Issues = {
             <td><span class="badge badge-amber">${U.esc(i.book?.grade || '?')}</span></td>
             <td>${U.fmt(i.issue_date)}</td>
             <td>${U.fmt(i.return_date)}</td>
+            <td${notesTooltip}>${condBadge(cond)}${i.condition_notes ? `<br><small style="color:var(--ink-faint);font-size:.68rem">${U.esc(i.condition_notes.substring(0,30))}${i.condition_notes.length>30?'…':''}</small>` : ''}</td>
             <td>${stBadge}</td>
             <td><div class="t-actions">${actionBtn}</div></td>
           </tr>`;
@@ -1496,6 +1574,11 @@ const Issues = {
 
       document.getElementById('issueBookCode').value = '';
 
+      // Reset condition fields
+      document.getElementById('issueCondition').value = 'good';
+      document.getElementById('issueConditionNotes').value = '';
+      document.getElementById('conditionWarningBox').classList.remove('visible');
+
       const today = U.today();
       document.getElementById('issueDate').value = today;
       document.getElementById('issueDue').value = U.addDays(today, loanDays);
@@ -1507,11 +1590,13 @@ const Issues = {
   closeModal() { closeModal('issueModal'); },
 
   async save() {
-    const student_id  = parseInt(document.getElementById('issueStudent').value);
-    const book_id     = parseInt(document.getElementById('issueBook').value);
-    const book_code   = document.getElementById('issueBookCode').value.trim();
-    const issue_date  = document.getElementById('issueDate').value;
-    const return_date = document.getElementById('issueDue').value || null;
+    const student_id      = parseInt(document.getElementById('issueStudent').value);
+    const book_id         = parseInt(document.getElementById('issueBook').value);
+    const book_code       = document.getElementById('issueBookCode').value.trim();
+    const issue_date      = document.getElementById('issueDate').value;
+    const return_date     = document.getElementById('issueDue').value || null;
+    const book_condition  = document.getElementById('issueCondition').value || 'good';
+    const condition_notes = document.getElementById('issueConditionNotes').value.trim();
 
     let valid = true; clearFgErrors('issueModal');
     if (!student_id) { fgErr('issueStudent', true, 'Select a student'); valid = false; }
@@ -1520,10 +1605,14 @@ const Issues = {
     if (!valid) return;
 
     try {
-      const result = await DB.addIssue({ student_id, book_id, book_code, issue_date, return_date, returned: false });
+      const result = await DB.addIssue({
+        student_id, book_id, book_code, issue_date, return_date, returned: false,
+        book_condition, condition_notes
+      });
       const sName = result.student?.student_name || student_id;
       const bName = result.book?.subject || book_id;
-      DB.addActivity('issue', `🔄 <strong>${bName}</strong> [${book_code}] issued to <strong>${sName}</strong>`);
+      const condNote = book_condition !== 'good' ? ` [${condLabel(book_condition)}]` : '';
+      DB.addActivity('issue', `🔄 <strong>${bName}</strong> [${book_code}]${condNote} issued to <strong>${sName}</strong>`);
       Toast.show('Book issued!', 'success');
       this.closeModal(); this.render(); Dashboard.render();
     } catch(e) { Toast.show('Error: ' + e.message, 'error'); }
@@ -1534,15 +1623,30 @@ const Issues = {
     const bName = issue?.book?.subject || 'Book';
     const sName = issue?.student?.student_name || 'Student';
     const code  = issue?.book_code ? ` [${issue.book_code}]` : '';
+    const cond  = issue?.book_condition || 'good';
+    const notes = issue?.condition_notes || '';
 
-    Confirm.show('Return Book', `Return "${bName}"${code} from ${sName}?`, async () => {
-      try {
-        await DB.returnIssue(issue_id);
-        DB.addActivity('return', `↩ <strong>${bName}</strong>${code} returned by <strong>${sName}</strong>`);
-        Toast.show('Book returned!', 'success');
-        Issues.render(); Dashboard.render();
-      } catch(e) { Toast.show('Error: ' + e.message, 'error'); }
-    }, 'Confirm Return', 'btn-teal', '↩');
+    // Build a message that reminds librarian of how the book was when issued
+    let condMsg = '';
+    if (cond !== 'good') {
+      condMsg = `\n\n⚠️ When issued this book was recorded as: ${condLabel(cond)}`;
+      if (notes) condMsg += `\nNotes: "${notes}"`;
+      condMsg += '\n\nCheck the book before confirming the return.';
+    }
+
+    Confirm.show(
+      'Return Book',
+      `Return "${bName}"${code} from ${sName}?${condMsg}`,
+      async () => {
+        try {
+          await DB.returnIssue(issue_id);
+          DB.addActivity('return', `↩ <strong>${bName}</strong>${code} returned by <strong>${sName}</strong>`);
+          Toast.show('Book returned!', 'success');
+          Issues.render(); Dashboard.render();
+        } catch(e) { Toast.show('Error: ' + e.message, 'error'); }
+      },
+      'Confirm Return', 'btn-teal', '↩'
+    );
   }
 };
 
@@ -1564,8 +1668,8 @@ const Reports = {
 
       if (type === 'issued') {
         const issues = await DB.getIssues({ status: 'active' });
-        headH = '<tr><th>ID</th><th>Student</th><th>Class</th><th>Book Code</th><th>Subject</th><th>Grade</th><th>Publisher</th><th>Issued</th><th>Due</th><th>Status</th></tr>';
-        rowsH = !issues.length ? empty(10, 'No active issues') : issues.map(i => {
+        headH = '<tr><th>ID</th><th>Student</th><th>Class</th><th>Book Code</th><th>Subject</th><th>Grade</th><th>Publisher</th><th>Condition</th><th>Issued</th><th>Due</th><th>Status</th></tr>';
+        rowsH = !issues.length ? empty(11, 'No active issues') : issues.map(i => {
           const od = i.return_date ? U.daysDiff(i.return_date) : -999;
           return `<tr>
             <td>${i.issue_id}</td>
@@ -1575,6 +1679,7 @@ const Reports = {
             <td><strong>${U.esc(i.book?.subject||'?')}</strong></td>
             <td><span class="badge badge-amber">${U.esc(i.book?.grade||'?')}</span></td>
             <td><small>${U.esc(i.book?.book_publisher||'?')}</small></td>
+            <td>${condBadge(i.book_condition||'good')}${i.condition_notes?`<br><small style="color:var(--ink-faint);font-size:.68rem">${U.esc(i.condition_notes)}</small>`:''}</td>
             <td>${U.fmt(i.issue_date)}</td>
             <td>${U.fmt(i.return_date)}</td>
             <td><span class="badge ${od>0?'badge-red':'badge-green'}">${od>0?'Overdue '+od+'d':'Active'}</span></td>
@@ -1583,8 +1688,8 @@ const Reports = {
 
       } else if (type === 'overdue') {
         const issues = await DB.getIssues({ status: 'overdue' });
-        headH = '<tr><th>ID</th><th>Student</th><th>Class</th><th>Subject</th><th>Grade</th><th>Due</th><th>Days Over</th></tr>';
-        rowsH = !issues.length ? empty(7, 'No overdue books! 🎉') : issues.map(i => {
+        headH = '<tr><th>ID</th><th>Student</th><th>Class</th><th>Subject</th><th>Grade</th><th>Condition</th><th>Due</th><th>Days Over</th></tr>';
+        rowsH = !issues.length ? empty(8, 'No overdue books! 🎉') : issues.map(i => {
           const od = U.daysDiff(i.return_date);
           return `<tr>
             <td>${i.issue_id}</td>
@@ -1592,10 +1697,39 @@ const Reports = {
             <td><small>${U.esc(i.student?.class||'?')}</small></td>
             <td><strong>${U.esc(i.book?.subject||'?')}</strong></td>
             <td><span class="badge badge-amber">${U.esc(i.book?.grade||'?')}</span></td>
+            <td>${condBadge(i.book_condition||'good')}</td>
             <td>${U.fmt(i.return_date)}</td>
             <td><span style="color:var(--crimson);font-weight:700">${od} days</span></td>
           </tr>`;
         }).join('');
+
+      } else if (type === 'damaged') {
+        /* ── NEW: Damaged / Problem Books report ── */
+        const issues = await DB.getIssues({ status: 'damaged' });
+        headH = '<tr><th>Issue ID</th><th>Student</th><th>Class</th><th>Book Code</th><th>Subject</th><th>Grade</th><th>Condition</th><th>Notes</th><th>Issued On</th><th>Status</th></tr>';
+        rowsH = !issues.length
+          ? empty(10, 'No books with problems recorded 🎉')
+          : issues.map(i => {
+              const returned = i.returned;
+              const od = (!returned && i.return_date) ? U.daysDiff(i.return_date) : 0;
+              const st = returned
+                ? `<span class="badge badge-gray">Returned</span>`
+                : od > 0
+                  ? `<span class="badge badge-red">Overdue ${od}d</span>`
+                  : `<span class="badge badge-green">Active</span>`;
+              return `<tr>
+                <td>${i.issue_id}</td>
+                <td>${U.esc(i.student?.student_name||'?')}</td>
+                <td><small>${U.esc(i.student?.class||'?')}</small></td>
+                <td><span class="badge badge-rust">${U.esc(i.book_code||'—')}</span></td>
+                <td><strong>${U.esc(i.book?.subject||'?')}</strong></td>
+                <td><span class="badge badge-amber">${U.esc(i.book?.grade||'?')}</span></td>
+                <td>${condBadge(i.book_condition)}</td>
+                <td><small>${U.esc(i.condition_notes || '—')}</small></td>
+                <td>${U.fmt(i.issue_date)}</td>
+                <td>${st}</td>
+              </tr>`;
+            }).join('');
 
       } else if (type === 'inventory') {
         const [books, issues] = await Promise.all([DB.getBooks(), DB.getIssues({ status: 'active' })]);
@@ -1620,13 +1754,14 @@ const Reports = {
 
       } else if (type === 'history') {
         const issues = await DB.getIssues();
-        headH = '<tr><th>ID</th><th>Student</th><th>Class</th><th>Subject</th><th>Grade</th><th>Issued</th><th>Returned</th><th>Status</th></tr>';
-        rowsH = !issues.length ? empty(8, 'No records') : issues.map(i => `<tr>
+        headH = '<tr><th>ID</th><th>Student</th><th>Class</th><th>Subject</th><th>Grade</th><th>Condition</th><th>Issued</th><th>Returned</th><th>Status</th></tr>';
+        rowsH = !issues.length ? empty(9, 'No records') : issues.map(i => `<tr>
           <td>${i.issue_id}</td>
           <td>${U.esc(i.student?.student_name||'?')}</td>
           <td><small>${U.esc(i.student?.class||'?')}</small></td>
           <td>${U.esc(i.book?.subject||'?')}</td>
           <td><span class="badge badge-amber">${U.esc(i.book?.grade||'?')}</span></td>
+          <td>${condBadge(i.book_condition||'good')}</td>
           <td>${U.fmt(i.issue_date)}</td>
           <td>${i.returned ? U.fmt(i.return_date) : '—'}</td>
           <td><span class="badge ${i.returned?'badge-gray':'badge-green'}">${i.returned?'Returned':'Active'}</span></td>
@@ -1641,7 +1776,11 @@ const Reports = {
   async exportCSV() {
     try {
       const type = this.current;
-      const issues = await DB.getIssues(type === 'overdue' ? { status: 'overdue' } : type === 'issued' ? { status: 'active' } : {});
+      const issues = await DB.getIssues(
+        type === 'overdue'  ? { status: 'overdue'  } :
+        type === 'issued'   ? { status: 'active'   } :
+        type === 'damaged'  ? { status: 'damaged'  } : {}
+      );
       const books = type === 'inventory' ? await DB.getBooks() : null;
       const today = U.today();
       let rows = [];
@@ -1653,13 +1792,24 @@ const Reports = {
         rows = [['ID','Category','Curriculum','Subject','Publisher','Grade','Total','Issued','Available'],
           ...books.map(b => { const iss = issuedMap[b.book_id]||0; return [b.book_id,b.book_category,b.curriculum,b.subject,b.book_publisher,b.grade,b.tot||0,iss,Math.max(0,(b.tot||0)-iss)]; })];
       } else {
-        rows = [['Issue ID','Student','Class','Subject','Grade','Issued','Return Date','Status'],
-          ...issues.map(i => [i.issue_id,i.student?.student_name||'?',i.student?.class||'?',i.book?.subject||'?',i.book?.grade||'?',i.issue_date,i.return_date||'',i.returned?'Returned':U.daysDiff(i.return_date)>0?'Overdue':'Active'])];
+        rows = [['Issue ID','Student','Class','Subject','Grade','Condition','Condition Notes','Issued','Return Date','Status'],
+          ...issues.map(i => [
+            i.issue_id,
+            i.student?.student_name||'?',
+            i.student?.class||'?',
+            i.book?.subject||'?',
+            i.book?.grade||'?',
+            condLabel(i.book_condition||'good'),
+            i.condition_notes||'',
+            i.issue_date,
+            i.return_date||'',
+            i.returned?'Returned':U.daysDiff(i.return_date)>0?'Overdue':'Active'
+          ])];
       }
 
       const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
       const blob = new Blob([csv], { type: 'text/csv' });
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `scholarlib_${type}_${today}.csv`; a.click();
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `apapec_lib_${type}_${today}.csv`; a.click();
       Toast.show('CSV exported!', 'success');
     } catch(e) { Toast.show('Export error: ' + e.message, 'error'); }
   }
@@ -1676,15 +1826,17 @@ const Settings = {
     document.getElementById('settingLoanDays').value = loanDays;
     try {
       const [books, students, issues] = await Promise.all([DB.getBooks(), DB.getStudents(), DB.getIssues()]);
-      const active = issues.filter(i => !i.returned);
-      const today = U.today();
+      const active  = issues.filter(i => !i.returned);
+      const today   = U.today();
       const overdue = active.filter(i => i.return_date && i.return_date < today);
-      document.getElementById('sysBooks').textContent = books.length;
-      document.getElementById('sysStudents').textContent = students.length;
+      const damaged = issues.filter(i => i.book_condition && i.book_condition !== 'good');
+      document.getElementById('sysBooks').textContent        = books.length;
+      document.getElementById('sysStudents').textContent     = students.length;
       document.getElementById('sysActiveIssues').textContent = active.length;
-      document.getElementById('sysTotalIssues').textContent = issues.length;
-      document.getElementById('sysOverdue').textContent = overdue.length;
-      document.getElementById('sysConn').textContent = '✅ Supabase';
+      document.getElementById('sysTotalIssues').textContent  = issues.length;
+      document.getElementById('sysOverdue').textContent      = overdue.length;
+      document.getElementById('sysDamaged').textContent      = damaged.length;
+      document.getElementById('sysConn').textContent         = '✅ Supabase';
       document.getElementById('connStatusSettings').textContent = '✅ Connected';
     } catch(e) {
       document.getElementById('sysConn').textContent = '❌ Error';
@@ -1710,9 +1862,6 @@ const Settings = {
     Toast.show('Password changed!', 'success');
   },
 
-  /* ══════════════════════════════════════
-     BACKUP — download full JSON snapshot
-  ══════════════════════════════════════ */
   async downloadBackup() {
     try {
       Toast.show('Preparing backup…', 'info');
@@ -1720,20 +1869,21 @@ const Settings = {
         DB.getBooks(), DB.getStudents(), DB.getIssues()
       ]);
       const backup = {
-        version: '1.0',
+        version: '1.1',
         exported_at: new Date().toISOString(),
         school: 'G.S APAPEC MURAMBI',
         books,
         students,
-        // Strip joined fields — keep only raw issue columns
         issues: issues.map(i => ({
-          issue_id:    i.issue_id,
-          student_id:  i.student_id,
-          book_id:     i.book_id,
-          book_code:   i.book_code,
-          issue_date:  i.issue_date,
-          return_date: i.return_date,
-          returned:    i.returned
+          issue_id:        i.issue_id,
+          student_id:      i.student_id,
+          book_id:         i.book_id,
+          book_code:       i.book_code,
+          issue_date:      i.issue_date,
+          return_date:     i.return_date,
+          returned:        i.returned,
+          book_condition:  i.book_condition  || 'good',
+          condition_notes: i.condition_notes || ''
         })),
         activity: DB.getActivity()
       };
@@ -1750,13 +1900,10 @@ const Settings = {
     }
   },
 
-  /* ══════════════════════════════════════
-     RESTORE — upload and re-insert backup
-  ══════════════════════════════════════ */
   async restoreBackup(input) {
     const file = input.files[0];
     if (!file) return;
-    input.value = ''; // reset file picker
+    input.value = '';
 
     Confirm.show(
       'Restore Backup',
@@ -1775,24 +1922,19 @@ const Settings = {
           let booksOk = 0, studentsOk = 0, issuesOk = 0;
 
           for (const b of backup.books) {
-            try {
-              const { book_id, _available, ...rest } = b;
-              await _sb.from('books').insert([rest]);
-              booksOk++;
-            } catch {}
+            try { const { book_id, _available, ...rest } = b; await _sb.from('books').insert([rest]); booksOk++; } catch {}
           }
 
           for (const s of backup.students) {
-            try {
-              const { student_id, ...rest } = s;
-              await _sb.from('students').insert([rest]);
-              studentsOk++;
-            } catch {}
+            try { const { student_id, ...rest } = s; await _sb.from('students').insert([rest]); studentsOk++; } catch {}
           }
 
           for (const i of backup.issues) {
             try {
               const { issue_id, book, student, ...rest } = i;
+              // ensure condition columns survive old backups that may not have them
+              if (!rest.book_condition) rest.book_condition = 'good';
+              if (rest.condition_notes === undefined) rest.condition_notes = '';
               await _sb.from('book_issues').insert([rest]);
               issuesOk++;
             } catch {}
@@ -1814,9 +1956,6 @@ const Settings = {
     );
   },
 
-  /* ══════════════════════════════════════
-     RESET — password-gated full wipe
-  ══════════════════════════════════════ */
   openResetModal() {
     document.getElementById('resetPwInput').value = '';
     document.getElementById('resetPwFg').classList.remove('has-error');
@@ -1840,7 +1979,6 @@ const Settings = {
       return;
     }
 
-    // Password correct — close modal and proceed
     fg.classList.remove('has-error');
     closeModal('resetModal');
     document.getElementById('resetPwInput').value = '';
@@ -1848,7 +1986,6 @@ const Settings = {
     try {
       Toast.show('Resetting system… please wait.', 'warning');
 
-      // Delete all rows from every table (gte(0) matches all positive integer PKs)
       const [r1, r2, r3] = await Promise.all([
         _sb.from('book_issues').delete().gte('issue_id', 0),
         _sb.from('students').delete().gte('student_id', 0),
@@ -1859,10 +1996,7 @@ const Settings = {
       if (r2.error) throw r2.error;
       if (r3.error) throw r3.error;
 
-      // Clear activity log from localStorage
       localStorage.removeItem('lib_activity');
-
-      // Add a single reset marker to activity
       DB.addActivity('delete', '🔴 System fully reset by administrator');
 
       Toast.show('System reset complete. All data has been erased.', 'success');
