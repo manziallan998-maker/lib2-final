@@ -117,17 +117,19 @@ table { border-collapse: collapse; width: 100%; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ─── STATS ─── */
-.stats-row { display: grid; grid-template-columns: repeat(5,1fr); gap: 15px; margin-bottom: 22px; }
+.stats-row { display: grid; grid-template-columns: repeat(6,1fr); gap: 15px; margin-bottom: 22px; }
 .stat-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 18px 20px; position: relative; overflow: hidden; transition: box-shadow var(--t), transform var(--t); }
 .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
 .stat-card::after { content: ''; position: absolute; top: 0; right: 0; width: 72px; height: 72px; border-radius: 0 0 0 72px; opacity: .07; }
 .s-rust::after { background: var(--rust); } .s-teal::after { background: var(--teal); }
 .s-amber::after { background: var(--amber); } .s-emerald::after { background: var(--emerald); }
 .s-violet::after { background: var(--violet); }
+.s-crimson::after { background: var(--crimson); }
 .stat-icon { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 12px; }
 .s-rust .stat-icon { background: var(--rust-light); } .s-teal .stat-icon { background: var(--teal-light); }
 .s-amber .stat-icon { background: var(--amber-light); } .s-emerald .stat-icon { background: var(--emerald-light); }
 .s-violet .stat-icon { background: var(--violet-light); }
+.s-crimson .stat-icon { background: var(--crimson-light); }
 .stat-val { font-family: 'Playfair Display', serif; font-size: 1.9rem; line-height: 1; margin-bottom: 3px; }
 .stat-lbl { font-size: .78rem; color: var(--ink-muted); font-weight: 500; }
 /* clickable stat card */
@@ -145,6 +147,7 @@ table { border-collapse: collapse; width: 100%; }
 .a-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
 .a-issue { background: var(--rust); } .a-return { background: var(--teal); }
 .a-add { background: var(--emerald); } .a-delete { background: var(--amber); }
+.a-lost { background: var(--crimson); }
 .a-text { font-size: .8rem; color: var(--ink-muted); line-height: 1.5; }
 .a-text strong { color: var(--ink); }
 .a-time { font-size: .68rem; color: var(--ink-faint); margin-top: 2px; display: block; }
@@ -206,6 +209,8 @@ table { border-collapse: collapse; width: 100%; }
 .btn-dl:hover { background: var(--crimson); color: #fff; }
 .btn-rt { background: var(--emerald-light); color: var(--emerald); padding: 3px 8px; border-radius: 4px; font-size: .73rem; font-weight: 600; transition: all var(--t); }
 .btn-rt:hover { background: var(--emerald); color: #fff; }
+.btn-lost { background: var(--violet-light); color: var(--violet); padding: 3px 8px; border-radius: 4px; font-size: .73rem; font-weight: 600; transition: all var(--t); }
+.btn-lost:hover { background: var(--violet); color: #fff; }
 .pagination { display: flex; align-items: center; justify-content: space-between; padding: 11px 16px; border-top: 1px solid var(--border); font-size: .78rem; color: var(--ink-muted); flex-wrap: wrap; gap: 7px; }
 .pg-btns { display: flex; gap: 3px; }
 .pg-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-size: .78rem; font-weight: 600; background: var(--surface-3); color: var(--ink); transition: all var(--t); border: 1px solid var(--border); cursor: pointer; }
@@ -413,6 +418,12 @@ table { border-collapse: collapse; width: 100%; }
       <div class="stat-val" id="statDamaged">0</div>
       <div class="stat-lbl">Books w/ Problems</div>
     </div>
+    <!-- NEW: lost books stat card — clicking it navigates to the lost-books report -->
+    <div class="stat-card s-crimson clickable" onclick="Nav.go('reports'); setTimeout(()=>Reports.renderReport('lost'),80)" title="View lost books &amp; fees report">
+      <div class="stat-icon">🚫</div>
+      <div class="stat-val" id="statLostStudents">0</div>
+      <div class="stat-lbl">Students w/ Lost Books</div>
+    </div>
   </div>
   <div class="dash-grid">
     <div class="card">
@@ -456,6 +467,7 @@ table { border-collapse: collapse; width: 100%; }
           <th onclick="Books.sort('subject')">Subject ↕</th>
           <th onclick="Books.sort('book_publisher')">Publisher ↕</th>
           <th onclick="Books.sort('grade')">Grade ↕</th>
+          <th onclick="Books.sort('pages')">Pages ↕</th>
           <th onclick="Books.sort('tot')">Total ↕</th>
           <th>Available</th>
           <th>Actions</th>
@@ -508,6 +520,7 @@ table { border-collapse: collapse; width: 100%; }
         <option value="overdue">Overdue</option>
         <option value="returned">Returned</option>
         <option value="damaged">With Problems</option>
+        <option value="lost">🚫 Lost</option>
       </select>
       <button class="btn btn-primary" onclick="Issues.openModal()">＋ Issue Book</button>
     </div>
@@ -517,7 +530,7 @@ table { border-collapse: collapse; width: 100%; }
       <table class="tbl">
         <thead><tr>
           <th>Issue ID</th><th>Student</th><th>Class</th><th>Book Code</th><th>Subject</th><th>Grade</th>
-          <th>Issued</th><th>Return Date</th><th>Condition</th><th>Status</th><th>Actions</th>
+          <th>Issued</th><th>Return Date</th><th>Condition</th><th>Status</th><th>Lost Fee (FRW)</th><th>Actions</th>
         </tr></thead>
         <tbody id="issuesTbody"></tbody>
       </table>
@@ -539,6 +552,7 @@ table { border-collapse: collapse; width: 100%; }
     <button class="rpt-tab active" data-report="issued">Active Issues</button>
     <button class="rpt-tab" data-report="overdue">Overdue</button>
     <button class="rpt-tab" data-report="damaged">🔧 Damaged Books</button>
+    <button class="rpt-tab" data-report="lost">🚫 Lost Books</button>
     <button class="rpt-tab" data-report="inventory">Inventory</button>
     <button class="rpt-tab" data-report="history">Full History</button>
   </div>
@@ -587,6 +601,8 @@ table { border-collapse: collapse; width: 100%; }
         <div class="info-row"><label>Total Issue Records</label><span class="val" id="sysTotalIssues">—</span></div>
         <div class="info-row"><label>Overdue</label><span class="val" id="sysOverdue">—</span></div>
         <div class="info-row"><label>Books w/ Problems</label><span class="val" id="sysDamaged">—</span></div>
+        <div class="info-row"><label>Books Reported Lost</label><span class="val" id="sysLostCount">—</span></div>
+        <div class="info-row"><label>Outstanding Lost-Book Fees</label><span class="val" id="sysLostFees" style="color:var(--crimson)">—</span></div>
         <div class="info-row"><label>Supabase</label><span class="val" id="sysConn">—</span></div>
       </div>
     </div>
@@ -682,6 +698,11 @@ table { border-collapse: collapse; width: 100%; }
           <label>Grade <span>*</span></label>
           <input class="fi" id="bkGrade" placeholder="e.g. Grade 8">
           <span class="ferr">Grade required</span>
+        </div>
+        <div class="fg">
+          <label>Number of Pages <span>*</span> <small style="font-weight:400;color:var(--ink-faint)">— used to calculate lost-book fee</small></label>
+          <input class="fi" type="number" id="bkPages" min="0" placeholder="e.g. 120">
+          <span class="ferr">Must be ≥ 0</span>
         </div>
         <div class="fg">
           <label>Total Copies <span>*</span></label>
@@ -794,6 +815,37 @@ table { border-collapse: collapse; width: 100%; }
   </div>
 </div>
 
+<!-- Lost Book Modal — calculates the replacement fee (pages × 50 FRW + 1,000 FRW cover) -->
+<div class="modal-overlay" id="lostModal">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-head">
+      <h3 class="modal-title">🚫 Mark Book as Lost</h3>
+      <button class="modal-x" onclick="Issues.closeLostModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--crimson-light);border:1px solid rgba(190,18,60,.2);border-radius:var(--r-sm);padding:13px 15px;margin-bottom:16px;font-size:.84rem;color:var(--crimson);line-height:1.7">
+        You are about to record <strong id="lostBookName">—</strong> as <strong>LOST</strong> by <strong id="lostStudentName">—</strong>. This cannot be undone, and a replacement fee will be calculated automatically based on the book's pages.
+      </div>
+      <div class="info-row"><label>Book Code</label><span class="val" id="lostBookCode">—</span></div>
+      <div class="info-row"><label>Pages</label><span class="val" id="lostBookPages">—</span></div>
+      <div class="info-row"><label>Page Fee (pages × 50 FRW)</label><span class="val" id="lostPageFee">—</span></div>
+      <div class="info-row"><label>Cover Fee (flat)</label><span class="val">1,000 FRW</span></div>
+      <div class="info-row" style="border-top:2px solid var(--border);margin-top:6px;padding-top:10px">
+        <label style="font-weight:700;color:var(--ink)">TOTAL TO PAY</label>
+        <span class="val" id="lostTotalFee" style="font-size:1.15rem;color:var(--crimson)">—</span>
+      </div>
+      <div class="fg full" style="margin-top:14px">
+        <label>Note <small style="font-weight:400;color:var(--ink-faint)">(optional — e.g. parent notified, payment plan, etc.)</small></label>
+        <input class="fi" type="text" id="lostNote" placeholder="e.g. Parent notified by phone on...">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="Issues.closeLostModal()">Cancel</button>
+      <button class="btn btn-danger" id="lostConfirmBtn" onclick="Issues.confirmLost()">🚫 Confirm Lost &amp; Record Fee</button>
+    </div>
+  </div>
+</div>
+
 <!-- Reset System Modal -->
 <div class="modal-overlay" id="resetModal">
   <div class="modal" style="max-width:420px">
@@ -862,6 +914,22 @@ function condBadge(val) {
 
 function condLabel(val) {
   return (CONDITION_MAP[val] || CONDITION_MAP['good']).label;
+}
+
+/* ═══════════════════════════════════════════════════
+   LOST-BOOK FEE CALCULATION
+   Fee = (number of pages × 50 FRW) + 1,000 FRW flat cover fee
+═══════════════════════════════════════════════════ */
+const LOST_FEE_PER_PAGE = 50;
+const LOST_FEE_COVER    = 1000;
+
+function calcLostFee(pages) {
+  const p = parseInt(pages) || 0;
+  return (p * LOST_FEE_PER_PAGE) + LOST_FEE_COVER;
+}
+
+function fmtFRW(n) {
+  return Number(n || 0).toLocaleString('en-US') + ' FRW';
 }
 
 /* ═══════════════════════════════════════════════════
@@ -953,10 +1021,11 @@ const DB = {
     let q = _sb.from('book_issues').select('*');
 
     const today = U.today();
-    if (filters.status === 'active')   q = q.eq('returned', false);
+    if (filters.status === 'active')   q = q.eq('returned', false).eq('lost', false);
     else if (filters.status === 'returned') q = q.eq('returned', true);
-    else if (filters.status === 'overdue')  q = q.eq('returned', false).lt('return_date', today);
+    else if (filters.status === 'overdue')  q = q.eq('returned', false).eq('lost', false).lt('return_date', today);
     else if (filters.status === 'damaged')  q = q.neq('book_condition', 'good');
+    else if (filters.status === 'lost')     q = q.eq('lost', true);
 
     if (filters.student_id) q = q.eq('student_id', filters.student_id);
     q = q.order('issue_date', { ascending: false });
@@ -1002,6 +1071,18 @@ const DB = {
       .update({ returned: true, return_date: today })
       .eq('issue_id', issue_id)
       .select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async markLost(issue_id, lost_fee, note) {
+    const updates = { lost: true, lost_date: U.today(), lost_fee };
+    if (note) {
+      const { data: existing } = await _sb.from('book_issues').select('condition_notes').eq('issue_id', issue_id).single();
+      const prevNotes = existing?.condition_notes || '';
+      updates.condition_notes = (prevNotes ? prevNotes + ' | ' : '') + `LOST (fee ${fmtFRW(lost_fee)}): ${note}`;
+    }
+    const { data, error } = await _sb.from('book_issues').update(updates).eq('issue_id', issue_id).select().single();
     if (error) throw error;
     return data;
   },
@@ -1156,16 +1237,19 @@ const Dashboard = {
         DB.getBooks(), DB.getStudents(), DB.getIssues()
       ]);
       const today = U.today();
-      const active  = issues.filter(i => !i.returned);
+      const active  = issues.filter(i => !i.returned && !i.lost);
       const overdue = active.filter(i => i.return_date && i.return_date < today);
       // count any issue record (active or returned) where condition is not good
       const damaged = issues.filter(i => i.book_condition && i.book_condition !== 'good');
+      // distinct students who currently have a book recorded as lost
+      const lostStudents = new Set(issues.filter(i => i.lost).map(i => i.student_id)).size;
 
       document.getElementById('statBooks').textContent    = books.length;
       document.getElementById('statStudents').textContent = students.length;
       document.getElementById('statIssued').textContent   = active.length;
       document.getElementById('statOverdue').textContent  = overdue.length;
       document.getElementById('statDamaged').textContent  = damaged.length;
+      document.getElementById('statLostStudents').textContent = lostStudents;
 
       const badge = document.getElementById('overdueNavBadge');
       if (overdue.length) { badge.style.display = ''; badge.textContent = overdue.length; }
@@ -1178,12 +1262,14 @@ const Dashboard = {
         tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:22px;color:var(--ink-muted)">No issues yet</td></tr>`;
       } else {
         tbody.innerHTML = recent.map(i => {
-          const overdueDays = i.return_date && !i.returned ? U.daysDiff(i.return_date) : 0;
-          const st = i.returned
-            ? `<span class="badge badge-gray">Returned</span>`
-            : overdueDays > 0
-              ? `<span class="badge badge-red">Overdue ${overdueDays}d</span>`
-              : `<span class="badge badge-green">Active</span>`;
+          const overdueDays = i.return_date && !i.returned && !i.lost ? U.daysDiff(i.return_date) : 0;
+          const st = i.lost
+            ? `<span class="badge badge-red">🚫 Lost</span>`
+            : i.returned
+              ? `<span class="badge badge-gray">Returned</span>`
+              : overdueDays > 0
+                ? `<span class="badge badge-red">Overdue ${overdueDays}d</span>`
+                : `<span class="badge badge-green">Active</span>`;
           return `<tr>
             <td>${U.esc(i.student?.student_name || '?')}</td>
             <td>${U.esc(i.book?.subject || i.book?.book_category || '?')}</td>
@@ -1231,10 +1317,11 @@ const Books = {
 
     try {
       let books = await DB.getBooks({ search: q, grade: gradeF, category: catF });
-      const issues = await DB.getIssues({ status: 'active' });
+      const allIssues = await DB.getIssues({ status: 'all' });
+      const outIssues = allIssues.filter(i => !i.returned); // active, overdue, or lost copies are all unavailable
 
       books = books.map(b => {
-        const issued = issues.filter(i => i.book_id === b.book_id).length;
+        const issued = outIssues.filter(i => i.book_id === b.book_id).length;
         return { ...b, _available: Math.max(0, (b.tot || 0) - issued) };
       });
 
@@ -1261,7 +1348,7 @@ const Books = {
     const tbody = document.getElementById('booksTbody');
 
     if (!data.length) {
-      tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">📚</div><h3>No books found</h3><p>Add your first book to get started.</p></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📚</div><h3>No books found</h3><p>Add your first book to get started.</p></div></td></tr>`;
     } else {
       tbody.innerHTML = data.map(b => `<tr>
         <td><strong>${b.book_id}</strong></td>
@@ -1270,6 +1357,7 @@ const Books = {
         <td><strong>${U.esc(b.subject)}</strong></td>
         <td><small>${U.esc(b.book_publisher)}</small></td>
         <td><span class="badge badge-amber">${U.esc(b.grade)}</span></td>
+        <td>${b.pages ?? 0}</td>
         <td><strong>${b.tot ?? 0}</strong></td>
         <td><span class="badge ${(b._available ?? 0) > 0 ? 'badge-green' : 'badge-red'}">${b._available ?? 0}</span></td>
         <td><div class="t-actions">
